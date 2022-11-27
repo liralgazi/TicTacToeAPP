@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="72dp"
-        android:text="TextView"
+        android:text=""
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -73,6 +73,7 @@
         app:layout_constraintVertical_bias="0.446"
         custom:boardColor="#000000"
         custom:XColor ="#F44336"
-        custom:OColor ="#03A9F4"/>
+        custom:OColor ="#03A9F4"
+        custom:winningLineColor= "#FFC107"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

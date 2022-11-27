@@ -1,5 +1,6 @@
 package com.example.tictactoe;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -18,6 +19,8 @@ public class TicTacToeBoard extends View {
     private final int XColor;
     private final int OColor;
     private final int winningLineColor;
+
+    private boolean winningLine= false;
     private int cellSize = getWidth()/3;
     private final Paint paint = new Paint();
     private final GameLogic game;
@@ -58,12 +61,19 @@ public class TicTacToeBoard extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
         drawGameBoard(canvas);
-//        drawX(canvas,1,1);
-//        drawO(canvas, 2,2);
+
         drawMarkers(canvas);
+
+        //drawing the line on the board
+        if(winningLine)
+        {
+            paint.setColor(winningLineColor);
+            drawWinningLine(canvas);
+        }
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -77,15 +87,24 @@ public class TicTacToeBoard extends View {
             int row = (int)Math.ceil(y/cellSize);
             int col = (int)Math.ceil(x/cellSize);
 
-            if(game.updateGameBoard(row,col)){
-                invalidate();
+            //prevent the users to tap on the board after there's a winner
+            if (!winningLine)
+            {
+                if (game.updateGameBoard(row, col)) {
+                    invalidate();
+                    if(game.winnerCheck()){
+                        winningLine = true;
+                        //updating our board
+                        invalidate();
+                    }
 
-                //updating the player's turn
-                if(game.getPlayer() % 2 == 0)
-                    //determine if its even or odd number
-                    game.setPlayer(game.getPlayer()-1);
-                else
-                    game.setPlayer(game.getPlayer()+1);
+                    //updating the player's turn
+                    if (game.getPlayer() % 2 == 0)
+                        //   determine if its even or odd number
+                        game.setPlayer(game.getPlayer() - 1);
+                    else
+                        game.setPlayer(game.getPlayer() + 1);
+                }
             }
 
             invalidate();
@@ -129,30 +148,93 @@ public class TicTacToeBoard extends View {
     {
         paint.setColor(XColor);
 
-        canvas.drawLine((col+1)*cellSize,
-                row*cellSize,
-                col*cellSize,
-                (row+1)*cellSize,
+        canvas.drawLine((float)((col+1)*cellSize - cellSize*0.2),
+                (float)(row*cellSize + cellSize*0.2),
+                (float)(col*cellSize + cellSize*0.2),
+                (float)((row+1)*cellSize -cellSize*0.2),
                 paint);
-        canvas.drawLine((col)*cellSize,
-                (row)*cellSize,
-                (col+1)*cellSize,
-                (row+1)*cellSize,
+        canvas.drawLine((float)((col)*cellSize + cellSize*0.2),
+                (float)((row)*cellSize + cellSize*0.2),
+                (float)((col+1)*cellSize - cellSize*0.2),
+                (float)((row+1)*cellSize - cellSize*0.2),
                 paint);
     }
     private void drawO(Canvas canvas, int row, int col)
     {
         paint.setColor(OColor);
 
-        canvas.drawOval(col*cellSize,
-                row*cellSize,
-                col*cellSize+ cellSize,
-                row*cellSize+cellSize,
+        canvas.drawOval((float)(col*cellSize + cellSize*0.2),
+                (float)(row*cellSize + cellSize*0.2),
+                (float)((col*cellSize+ cellSize) -cellSize*0.2),
+                (float)((row*cellSize+cellSize) - cellSize*0.2),
                 paint);
 
     }
 
 
+    //DRAW LINES METHODS
+
+    private void drawHorizontalLine(Canvas canvas,int row,int col )
+    {
+        //draw the line int the middle of the row (middle of the cell)
+        canvas.drawLine(col,
+                (float) (row*cellSize + cellSize/2),
+                cellSize*3,
+                (float) (row*cellSize + cellSize/2),
+                paint);
+    }
+
+    private void drawVerticalLine(Canvas canvas,int row,int col )
+    {
+        //draw the line int the middle of the row (middle of the cell)
+        canvas.drawLine((float) (col*cellSize + cellSize/2),
+                row,
+                (float) (col*cellSize + cellSize/2),
+                cellSize*3,
+                paint);
+    }
+
+    private void drawDiagonalLinePos(Canvas canvas)
+    {
+        //draw the line int the middle of the row (middle of the cell)
+        canvas.drawLine(0,
+                cellSize*3,
+                cellSize*3,
+                0,
+                paint);
+    }
+
+    private void drawDiagonalLineNeg(Canvas canvas)
+    {
+        //draw the line int the middle of the row (middle of the cell)
+        canvas.drawLine(0,
+                0,
+                cellSize*3,
+                cellSize*3,
+                paint);
+    }
+
+    private void drawWinningLine(Canvas canvas)
+    {
+        //draw the line according to the winner
+        int row = game.getWinType()[0];
+        int col = game.getWinType()[1];
+        switch (game.getWinType()[2]){
+            //horizontal
+            case 1:
+                drawHorizontalLine(canvas,row,col);
+                break;
+            case 2:
+                drawVerticalLine(canvas,row,col);
+                break;
+            case 3:
+                drawDiagonalLineNeg(canvas);
+                break;
+            case 4:
+                drawDiagonalLinePos(canvas);
+                break;
+        }
+    }
     public void setUpGame(Button playAgain, Button home,TextView playerDisplay, String[] names )
     {
         //assign the values
@@ -165,6 +247,7 @@ public class TicTacToeBoard extends View {
 
     public void resetGame(){
         game.resetGame();
+        winningLine =false;
     }
 
 

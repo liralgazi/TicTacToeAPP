@@ -21,8 +21,17 @@ public class GameDisplay extends AppCompatActivity {
         Button homeBTN = findViewById(R.id.button6);
         TextView playerTurn = findViewById(R.id.playerTurn);
 
+        //the buttons will not be visible until the game is finished
+        playAgainBTN.setVisibility(View.GONE);
+        homeBTN.setVisibility(View.GONE);
 
-        String[] playerNames = getIntent().getStringArrayExtra("PLAYER_NAME");
+        String[] playerNames = getIntent().getStringArrayExtra("PLAYER_NAMES");
+
+        //if the user didn't assign names
+        if(playerNames != null)
+        {
+            playerTurn.setText(playerNames[0]+ "'s Turn");
+        }
 
         //find the board and store it into a variable
         ticTacToeBoard  = findViewById(R.id.ticTacToeBoard);
@@ -32,9 +41,9 @@ public class GameDisplay extends AppCompatActivity {
 
     public void playAgainBtnClick(View view)
     {
-        ticTacToeBoard.resetGame();
-        //update the display
-        ticTacToeBoard.invalidate();
+       ticTacToeBoard.resetGame();
+       //update the display
+       ticTacToeBoard.invalidate();
     }
 
     public void homeBtnClick(View view)
